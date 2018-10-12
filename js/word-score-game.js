@@ -150,8 +150,94 @@ function getAvailableLetter(){
 
 function findWordToUse(){
  //TODO Your job starts here.
-	alert("Your code needs to go here");	
+    //为YOUR_HAND排序
+	var test = YOUR_HAND.sort(function (a,b) {return a.pointsWhenLettersUsed < b.pointsWhenLettersUsed ? 1 : -1  });
+	var letters = new Array();
+	for(var i = 0; i < 7; i++){
+	    if(test[i].letter !== '_'){
+            //获取非'_'字符
+	        letters.push(test[i].letter);
+        }
+    }
+    //查找所有可能的组合情况
+    letters = findHowManyWordsCanBeMake(letters);
+
+    var finalWords = new Array();
+    for (var i = 0; i < letters.length; i++){
+        if(Word_List.isInList(letters[i])){
+            //计算最终单词的得分
+            finalWords.push(new finalWordsAndScore(letters[i], finalWordsScore({
+                finalWords: letters[i],
+                YOUR_HAND: YOUR_HAND
+            })));
+        }
+    }
+    //为最终单词按分数排序
+    finalWords.sort(function (a,b) {return a.score < b.score ? 1 : -1  });
+    if(finalWords.length > 0){
+        //取最大分数
+        successfullyAddedWord(finalWords[0].words);
+    }
+    else {
+        successfullyAddedWord("");
+    }
 }
+
+function finalWordsScore(parameters) {
+    var finalWords = parameters.finalWords;
+    var YOUR_HAND = parameters.YOUR_HAND;
+    var words = finalWords.split("");
+    var score = 0;
+    for(var i = 0; i < words.length; i++){
+        for (var j = 0; j < 7; j++){
+            if(YOUR_HAND[j].letter === words[i]){
+                score += YOUR_HAND[j].pointsWhenLettersUsed;
+                YOUR_HAND[i].used = true;
+                break;
+            }
+        }
+    }
+    return score;
+}
+
+function findHowManyWordsCanBeMake(letters) {
+    var result = new Array();  //保存所有组合的数组
+    function getAllComb(str)
+    {
+        var len = str.length;
+        for(var i = 1;i <= len;i++) {
+            getComb(str, len, i);
+        }
+    }
+    //从数组myarr(n)中任选m个元素的所有组合(m>=1 && m<=n)。
+    function getComb(str,n,m,rs)
+    {
+        if(rs == null)
+            rs = new Array();
+        for(var i = n; i >= m; i--)
+        {
+            rs[m-1]=str[i-1];      //取出第n个元素作为组合的第一个元素
+            if(m>1)
+                getComb(str,i-1,m-1,rs);  //递归，在n-1个元素中取m-1个元素,直到取出最后一个元素
+            var comb = rs.join("");     //获得一个组合
+            if(!checkExist(result,comb))
+                result.push(comb);
+        }
+    }
+
+    //查找某元素是否存在数组中,存在返回true,不存在返回false
+    function checkExist(str,e)
+    {
+        for(var i=0;i<str.length;i++)
+            if(e === str[i]) return true;
+        return false;
+    }
+
+    getAllComb(letters);
+    return result;
+}
+
+
 function humanFindWordToUse(){
 	
 	 var humanFoundWord = $( "#human-word-input").val();
